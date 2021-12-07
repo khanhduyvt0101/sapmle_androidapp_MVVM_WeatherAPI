@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Weather_Sample_Android_App</string>
+    <string name="refresh">Refresh</string>
+</resources>
