@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract class BaseRecyclerAdapter<M, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
-    private List<M> mItems = new LinkedList<>();
+    private final List<M> mItems = new LinkedList<>();
 
     public BaseRecyclerAdapter() {
         setHasStableIds(true);

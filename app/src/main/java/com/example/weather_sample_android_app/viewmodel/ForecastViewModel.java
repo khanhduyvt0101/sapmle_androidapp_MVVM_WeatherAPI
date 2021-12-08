@@ -12,13 +12,14 @@ import android.provider.Settings;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.weather_sample_android_app.view.activity.MainActivity;
+import com.example.weather_sample_android_app.local.data.DataLocalManager;
 import com.example.weather_sample_android_app.location.LocationManager;
 import com.example.weather_sample_android_app.model.DataPointModel;
 import com.example.weather_sample_android_app.model.Forecast;
 import com.example.weather_sample_android_app.network.RestApiClient;
 import com.example.weather_sample_android_app.utlis.DateFormatter;
 import com.example.weather_sample_android_app.utlis.TemperatureFormatter;
+import com.example.weather_sample_android_app.view.activity.MainActivity;
 import com.example.weather_sample_android_app.view.adapter.ForecastAdapter;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
@@ -32,9 +33,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ForecastViewModel extends BaseViewModel<Forecast> implements LocationListener {
-    public LocationManager locationManager;
     private final Context context;
     private final RestApiClient restApiClient;
+    public LocationManager locationManager;
     private List<ForecastAdapter.ItemViewType> items;
 
     private boolean showProgressBar;
@@ -55,33 +56,37 @@ public class ForecastViewModel extends BaseViewModel<Forecast> implements Locati
     @Override
     public void setModelData(Forecast modelData) {
         super.setModelData(modelData);
-        setItems(modelData);
+        DataLocalManager.setForecast(modelData);
+        setItems();
     }
 
     public List<ForecastAdapter.ItemViewType> getItems() {
         return items;
     }
 
-    private void setItems(final Forecast forecast) {
+    private void setItems() {
+        Forecast forecast = DataLocalManager.getForecast();
         items = new ArrayList<>();
+        if (forecast != null) {
+            CurrentForecast currentForecast = new CurrentForecast();
+            currentForecast.setIcon(forecast.getCurrently().getIcon());
+            currentForecast.setTemperature(TemperatureFormatter.format(forecast.getCurrently().getTemperature()));
+            currentForecast.setSummary(forecast.getCurrently().getSummary());
+            currentForecast.setNextHourForecast(forecast.getHourly().getSummary());
+            currentForecast.setNext24HoursForecast(forecast.getDaily().getSummary());
+            items.add(currentForecast);
 
-        // set current forecast
-        CurrentForecast currentForecast = new CurrentForecast();
-        currentForecast.setIcon(forecast.getCurrently().getIcon());
-        currentForecast.setTemperature(TemperatureFormatter.format(forecast.getCurrently().getTemperature()));
-        currentForecast.setSummary(forecast.getCurrently().getSummary());
-        currentForecast.setNextHourForecast(forecast.getHourly().getSummary());
-        currentForecast.setNext24HoursForecast(forecast.getDaily().getSummary());
-        items.add(currentForecast);
-
-        // set daily forecast
-        for (DataPointModel item : forecast.getDaily().getData()) {
-            DailyForecast dailyForecast = new DailyForecast();
-            dailyForecast.setIcon(item.getIcon());
-            dailyForecast.setDate(DateFormatter.getDate(item.getTime()));
-            dailyForecast.setSummary(item.getSummary());
-            items.add(dailyForecast);
+            // set daily forecast
+            for (DataPointModel item : forecast.getDaily().getData()) {
+                DailyForecast dailyForecast = new DailyForecast();
+                dailyForecast.setIcon(item.getIcon());
+                dailyForecast.setDate(DateFormatter.getDate(item.getTime()));
+                dailyForecast.setSummary(item.getSummary());
+                items.add(dailyForecast);
+            }
         }
+        // set current forecast
+
     }
 
     public boolean getShowProgressBar() {

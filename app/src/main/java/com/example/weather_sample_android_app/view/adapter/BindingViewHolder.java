@@ -7,7 +7,7 @@ import androidx.databinding.ViewDataBinding;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class BindingViewHolder extends RecyclerView.ViewHolder {
-    private ViewDataBinding binding;
+    private final ViewDataBinding binding;
 
     public ViewDataBinding getBinding() {
         return binding;

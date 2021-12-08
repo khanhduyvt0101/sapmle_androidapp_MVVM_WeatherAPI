@@ -14,8 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RestApiClient {
     public static final String API_KEY = "6ba2796f17afd5fe09ba8e7027860f63";
 
-    private Retrofit retrofit;
-    private ApiService apiService;
+    private final ApiService apiService;
 
     public RestApiClient() {
         OkHttpClient client = new OkHttpClient.Builder()
@@ -24,7 +23,7 @@ public class RestApiClient {
                 .writeTimeout(20, TimeUnit.SECONDS)
                 .build();
 
-        retrofit = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BuildConfig.BASE_URL)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
