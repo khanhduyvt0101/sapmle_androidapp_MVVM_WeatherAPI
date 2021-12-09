@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.Settings;
 
 import androidx.annotation.RequiresApi;
@@ -56,7 +57,9 @@ public class ForecastViewModel extends BaseViewModel<Forecast> implements Locati
     @Override
     public void setModelData(Forecast modelData) {
         super.setModelData(modelData);
-        DataLocalManager.setForecast(modelData);
+        if (modelData != null) {
+            DataLocalManager.setForecast(modelData);
+        }
         setItems();
     }
 
@@ -86,7 +89,6 @@ public class ForecastViewModel extends BaseViewModel<Forecast> implements Locati
             }
         }
         // set current forecast
-
     }
 
     public boolean getShowProgressBar() {
@@ -137,19 +139,28 @@ public class ForecastViewModel extends BaseViewModel<Forecast> implements Locati
     public void fetchWeatherForecast(Location location) {
         showProgressBar();
 
-        restApiClient.fetchWeatherForecast(location.getLongitude(), location.getLatitude(), new Callback<Forecast>() {
+        long SECOND_IN_MILLI = 60000;//60000 seconds
+        final Handler timerHandler = new Handler();
+        final Runnable timerRunnable = new Runnable() {
             @Override
-            public void onResponse(Call<Forecast> call, Response<Forecast> response) {
-                Forecast forecast = response.body();
-                setModelData(forecast);
-                hideProgressBar();
-            }
+            public void run() {
+                restApiClient.fetchWeatherForecast(location.getLongitude(), location.getLatitude(), new Callback<Forecast>() {
+                    @Override
+                    public void onResponse(Call<Forecast> call, Response<Forecast> response) {
+                        Forecast forecast = response.body();
+                        setModelData(forecast);
+                        hideProgressBar();
+                    }
 
-            @Override
-            public void onFailure(Call<Forecast> call, Throwable t) {
-                hideProgressBar();
+                    @Override
+                    public void onFailure(Call<Forecast> call, Throwable t) {
+                        hideProgressBar();
+                    }
+                });
+                timerHandler.postDelayed(this, SECOND_IN_MILLI);
             }
-        });
+        };
+        timerHandler.postDelayed(timerRunnable, SECOND_IN_MILLI);
     }
 
     private void showProgressBar() {
@@ -180,3 +191,5 @@ public class ForecastViewModel extends BaseViewModel<Forecast> implements Locati
         }
     }
 }
+
+
