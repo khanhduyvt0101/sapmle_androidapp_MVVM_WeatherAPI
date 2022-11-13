@@ -1,1 +1,1 @@
-# sapmle_androidapp_MVVM_WeatherAPI
+# WeatherAPI app using MVVM
